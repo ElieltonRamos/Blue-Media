@@ -1,0 +1,131 @@
+<main class="h-screen w-screen flex bg-bg-base overflow-hidden">
+  <button
+    (click)="themeService.toggle()"
+    class="absolute top-4 right-4 z-10 bg-bg-card border border-(--color-border) text-(--color-text-secondary) hover:text-(--color-text-primary) rounded-md px-3 py-1.5 text-sm transition-colors"
+  >
+    {{ themeService.theme() === 'dark' ? '☀️ Claro' : '🌙 Escuro' }}
+  </button>
+
+  <span class="absolute top-4 left-6 z-10 font-bold text-2xl">
+    <span class="text-blue-600">BLUE </span><span class="text-gray-800">MEDIA</span>
+  </span>
+
+  <!-- Form Panel -->
+  <div class="w-1/2 h-screen flex flex-col justify-center px-16 bg-bg-base">
+    <div class="w-full max-w-sm mx-auto">
+      <h1 class="text-(--color-text-primary) font-bold text-3xl leading-tight mb-1 mt-10">
+        Bem-vindo de volta
+      </h1>
+      <p class="text-(--color-text-secondary) text-sm mb-8">Acesse sua estação de trabalho</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Usuario -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-(--color-text-primary) mb-1.5">
+            Usuario
+          </label>
+          <input
+            #usernameInput
+            type="text"
+            formControlName="username"
+            placeholder="admin"
+            (keydown.enter)="$event.preventDefault(); passwordInput.focus()"
+            class="w-full h-11 px-3.5 rounded-lg text-sm text-(--color-input-text) placeholder:text-(--color-input-placeholder) outline-none transition-all bg-(--color-input-bg) border border-(--color-input-border) focus:border-(--color-input-border-focus)"
+            [class.border-danger!]="form.get('username')?.touched && form.get('username')?.invalid"
+          />
+          @if (form.get('username')?.touched && form.get('username')?.invalid) {
+            <p class="text-(--color-danger) text-xs mt-1">Usuario inválido</p>
+          }
+        </div>
+
+        <!-- Senha -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-(--color-text-primary) mb-1.5">
+            Senha
+          </label>
+          <div class="relative">
+            <input
+              #passwordInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              class="w-full h-11 px-3.5 pr-10 rounded-lg text-sm text-(--color-input-text) placeholder:text-(--color-input-placeholder) outline-none transition-all bg-(--color-input-bg) border border-(--color-input-border) focus:border-(--color-input-border-focus)"
+              [class.border-danger!]="
+                form.get('password')?.touched && form.get('password')?.invalid
+              "
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-(--color-text-muted) hover:text-(--color-text-secondary) transition-colors"
+            >
+              @if (showPassword()) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21"
+                  />
+                </svg>
+              } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              }
+            </button>
+          </div>
+          @if (form.get('password')?.touched && form.get('password')?.invalid) {
+            <p class="text-(--color-danger) text-xs mt-1">Senha inválida</p>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="w-full h-11 rounded-lg text-(--color-btn-primary-text) text-sm font-semibold transition-all cursor-pointer bg-(--color-btn-primary-bg) hover:bg-(--color-btn-primary-hover)"
+        >
+          Entrar no Sistema
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-text-disabled mt-8">
+        © 2026 Grupo SAE. Versão: {{ version }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Illustration Panel -->
+  <div
+    class="w-1/2 h-screen flex items-center justify-center bg-black p-8 overflow-hidden"
+  >
+    <img
+      src="logo-sae-removebg.png"
+      alt="Grupo SAE"
+      class="max-w-full max-h-full w-auto h-auto object-contain"
+    />
+  </div>
+</main>
