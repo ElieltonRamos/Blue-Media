@@ -51,7 +51,7 @@ async function bootstrap() {
   console.log(`VERSAO SERVIDOR = ${packageVersion}`);
   console.log('=============================');
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.ENVIRONMENT !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Blue Media API')
       .setDescription(
@@ -59,7 +59,6 @@ async function bootstrap() {
       )
       .setVersion('1.0')
       .addBearerAuth()
-      .addSecurityRequirements('bearer')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
