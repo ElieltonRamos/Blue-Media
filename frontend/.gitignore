@@ -5,6 +5,7 @@
 /tmp
 /out-tsc
 /bazel-out
+diff.txt
 
 # Node
 /node_modules
