@@ -2,7 +2,7 @@
 CREATE TABLE `categories` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `categories_name_key`(`name`),
     PRIMARY KEY (`id`)
@@ -13,7 +13,7 @@ CREATE TABLE `clients` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
     `category_id` INTEGER NOT NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL,
     `updated_at` DATETIME(3) NOT NULL,
 
     INDEX `clients_category_id_idx`(`category_id`),
@@ -24,15 +24,16 @@ CREATE TABLE `clients` (
 CREATE TABLE `users` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
+    `username` VARCHAR(255) NOT NULL,
     `password_hash` VARCHAR(255) NOT NULL,
     `role` ENUM('admin', 'operator') NOT NULL DEFAULT 'operator',
     `is_active` BOOLEAN NOT NULL DEFAULT true,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL,
     `updated_at` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `users_email_key`(`email`),
-    INDEX `users_email_idx`(`email`),
+    UNIQUE INDEX `users_name_key`(`name`),
+    UNIQUE INDEX `users_username_key`(`username`),
+    INDEX `users_username_idx`(`username`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -46,7 +47,7 @@ CREATE TABLE `totems` (
     `content_mode` ENUM('shared', 'exclusive', 'exclusive_strict') NOT NULL DEFAULT 'shared',
     `status` ENUM('online', 'offline') NOT NULL DEFAULT 'offline',
     `last_seen_at` DATETIME(3) NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL,
     `updated_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `totems_serial_key`(`serial`),
@@ -61,7 +62,7 @@ CREATE TABLE `totem_credentials` (
     `device_id` VARCHAR(255) NOT NULL,
     `token_hash` VARCHAR(255) NOT NULL,
     `revoked_at` DATETIME(3) NULL,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `totem_credentials_device_id_key`(`device_id`),
     INDEX `totem_credentials_device_id_idx`(`device_id`),
@@ -78,7 +79,7 @@ CREATE TABLE `media` (
     `duration` INTEGER NOT NULL,
     `weight` INTEGER NOT NULL DEFAULT 1,
     `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `created_at` DATETIME(3) NOT NULL,
     `updated_at` DATETIME(3) NOT NULL,
 
     INDEX `media_client_id_idx`(`client_id`),
@@ -91,7 +92,7 @@ CREATE TABLE `playback_logs` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `totem_id` INTEGER NOT NULL,
     `media_id` INTEGER NOT NULL,
-    `played_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `played_at` DATETIME(3) NOT NULL,
 
     INDEX `playback_logs_totem_id_played_at_idx`(`totem_id`, `played_at`),
     PRIMARY KEY (`id`)

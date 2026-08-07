@@ -16,6 +16,7 @@ const adapter = new PrismaMariaDb({
   database: DATABASE_NAME,
   connectionLimit: 5,
   allowPublicKeyRetrieval: true,
+  timezone: '-03:00',
 });
 
 const prisma = new PrismaClient({ adapter });

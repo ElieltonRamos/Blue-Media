@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ConflictException,
   Injectable,
@@ -9,10 +10,21 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { prisma } from '../../core/database/prisma';
 import { LoginDto } from './dto/login.dto';
-import { JwtPayload } from '../../core/guards/jwt-auth.guard';
 import { Prisma } from '../../../generated/prisma/client';
+import { prisma } from '../../core/database/prisma';
+import { JwtPayload } from '../../core/guards/jwt-auth.guard';
+import { nowBrasilia } from '../../core/utils/date-utils';
+
+const USER_SAFE_SELECT = {
+  id: true,
+  name: true,
+  username: true,
+  role: true,
+  isActive: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.UserSelect;
 
 @Injectable()
 export class UsersService {
@@ -27,10 +39,13 @@ export class UsersService {
       return await prisma.user.create({
         data: {
           name: dto.name,
-          email: dto.email,
+          username: dto.username,
           passwordHash,
           role: dto.role,
+          createdAt: nowBrasilia(),
+          updatedAt: nowBrasilia(),
         },
+        select: USER_SAFE_SELECT,
       });
     } catch (error) {
       if (
@@ -38,23 +53,26 @@ export class UsersService {
         error.code === 'P2002'
       ) {
         this.logger.warn(
-          `Tentativa de cadastro com email já existente: ${dto.email}`,
+          `Tentativa de cadastro com dado duplicado (username: ${dto.username})`,
         );
-        throw new ConflictException('Email já cadastrado');
+        throw new ConflictException(this.duplicateFieldMessage(error));
       }
       this.logger.error(
-        `Falha ao criar usuário (email: ${dto.email}): ${this.extractErrorMessage(error)}`,
+        `Falha ao criar usuário (username: ${dto.username}): ${this.extractErrorMessage(error)}`,
       );
       throw error;
     }
   }
 
-  async findAll() {
-    return prisma.user.findMany();
+  findAll() {
+    return prisma.user.findMany({ select: USER_SAFE_SELECT });
   }
 
   async findOne(id: number) {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: USER_SAFE_SELECT,
+    });
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
     }
@@ -63,7 +81,11 @@ export class UsersService {
 
   async update(id: number, dto: UpdateUserDto) {
     try {
-      return await prisma.user.update({ where: { id }, data: dto });
+      return await prisma.user.update({
+        where: { id },
+        data: { ...dto, updatedAt: nowBrasilia() },
+        select: USER_SAFE_SELECT,
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -76,9 +98,9 @@ export class UsersService {
         error.code === 'P2002'
       ) {
         this.logger.warn(
-          `Tentativa de atualização com email já existente (id: ${id})`,
+          `Tentativa de atualização com dado duplicado (id: ${id})`,
         );
-        throw new ConflictException('Email já cadastrado');
+        throw new ConflictException(this.duplicateFieldMessage(error));
       }
       this.logger.error(
         `Falha ao atualizar usuário (id: ${id}): ${this.extractErrorMessage(error)}`,
@@ -105,11 +127,13 @@ export class UsersService {
   }
 
   async login(dto: LoginDto) {
-    const user = await prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await prisma.user.findUnique({
+      where: { username: dto.username },
+    });
 
     if (!user) {
       this.logger.warn(
-        `Tentativa de login com email não cadastrado: ${dto.email}`,
+        `Tentativa de login com username não cadastrado: ${dto.username}`,
       );
       throw new UnauthorizedException('Credenciais inválidas');
     }
@@ -131,13 +155,23 @@ export class UsersService {
 
     const payload: JwtPayload = {
       userId: user.id,
-      email: user.email,
+      username: user.username,
       role: user.role,
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };
+  }
+
+  private duplicateFieldMessage(
+    error: Prisma.PrismaClientKnownRequestError,
+  ): string {
+    const target = error.meta?.target;
+    const field = Array.isArray(target) ? target[0] : target;
+    if (field === 'name') return 'Nome já cadastrado';
+    if (field === 'username') return 'Username já cadastrado';
+    return 'Dado já cadastrado';
   }
 
   private extractErrorMessage(error: unknown): string {

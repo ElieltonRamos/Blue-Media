@@ -9,7 +9,7 @@ import { Request } from 'express';
 
 export interface JwtPayload {
   userId: number;
-  email: string;
+  username: string;
   role: string;
 }
 
