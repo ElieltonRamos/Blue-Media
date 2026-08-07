@@ -9,9 +9,8 @@ import { Request } from 'express';
 
 export interface JwtPayload {
   userId: number;
-  username: string;
+  email: string;
   role: string;
-  companyId: number;
 }
 
 @Injectable()
