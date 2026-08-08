@@ -32,11 +32,11 @@ export class UsersService {
 
   constructor(private jwtService: JwtService) {}
 
-  async create(dto: CreateUserDto) {
+  async create(dto: CreateUserDto, actorUsername: string) {
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     try {
-      return await prisma.user.create({
+      const user = await prisma.user.create({
         data: {
           name: dto.name,
           username: dto.username,
@@ -47,18 +47,22 @@ export class UsersService {
         },
         select: USER_SAFE_SELECT,
       });
+      this.logger.log(
+        `Usuário criado por ${actorUsername} (id: ${user.id}, username: ${user.username})`,
+      );
+      return user;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         this.logger.warn(
-          `Tentativa de cadastro com dado duplicado (username: ${dto.username})`,
+          `Tentativa de cadastro com dado duplicado por ${actorUsername} (username: ${dto.username})`,
         );
         throw new ConflictException(this.duplicateFieldMessage(error));
       }
       this.logger.error(
-        `Falha ao criar usuário (username: ${dto.username}): ${this.extractErrorMessage(error)}`,
+        `Falha ao criar usuário por ${actorUsername} (username: ${dto.username}): ${this.extractErrorMessage(error)}`,
       );
       throw error;
     }
@@ -79,13 +83,17 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, dto: UpdateUserDto) {
+  async update(id: number, dto: UpdateUserDto, actorUsername: string) {
     try {
-      return await prisma.user.update({
+      const user = await prisma.user.update({
         where: { id },
         data: { ...dto, updatedAt: nowBrasilia() },
         select: USER_SAFE_SELECT,
       });
+      this.logger.log(
+        `Usuário atualizado por ${actorUsername} (id: ${id}, username: ${user.username})`,
+      );
+      return user;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -98,20 +106,21 @@ export class UsersService {
         error.code === 'P2002'
       ) {
         this.logger.warn(
-          `Tentativa de atualização com dado duplicado (id: ${id})`,
+          `Tentativa de atualização com dado duplicado por ${actorUsername} (id: ${id})`,
         );
         throw new ConflictException(this.duplicateFieldMessage(error));
       }
       this.logger.error(
-        `Falha ao atualizar usuário (id: ${id}): ${this.extractErrorMessage(error)}`,
+        `Falha ao atualizar usuário por ${actorUsername} (id: ${id}): ${this.extractErrorMessage(error)}`,
       );
       throw error;
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, actorUsername: string) {
     try {
       await prisma.user.delete({ where: { id } });
+      this.logger.log(`Usuário removido por ${actorUsername} (id: ${id})`);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -120,7 +129,7 @@ export class UsersService {
         throw new NotFoundException('Usuário não encontrado');
       }
       this.logger.error(
-        `Falha ao remover usuário (id: ${id}): ${this.extractErrorMessage(error)}`,
+        `Falha ao remover usuário por ${actorUsername} (id: ${id}): ${this.extractErrorMessage(error)}`,
       );
       throw error;
     }
@@ -160,6 +169,8 @@ export class UsersService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
+
+    this.logger.log(`Login realizado (username: ${user.username})`);
 
     return { accessToken };
   }

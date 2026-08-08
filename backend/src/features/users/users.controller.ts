@@ -21,6 +21,7 @@ import { LoginDto } from './dto/login.dto';
 import { Roles } from '../../core/decorators/roles.decorator';
 import { UserRole } from '../../../generated/prisma/enums';
 import { Public } from '../../core/decorators/public.decorator';
+import { CurrentUser } from '../../core/decorators/current-user.decorator';
 
 @ApiTags('users')
 @Controller('users')
@@ -43,8 +44,11 @@ export class UsersController {
   @ApiResponse({ status: 409, description: 'Email já cadastrado' })
   @Roles(UserRole.admin)
   @Post()
-  create(@Body() dto: CreateUserDto) {
-    return this.usersService.create(dto);
+  create(
+    @Body() dto: CreateUserDto,
+    @CurrentUser('username') actorUsername: string,
+  ) {
+    return this.usersService.create(dto, actorUsername);
   }
 
   @ApiBearerAuth()
@@ -66,15 +70,22 @@ export class UsersController {
   @ApiOperation({ summary: 'Atualizar usuário' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser('username') actorUsername: string,
+  ) {
+    return this.usersService.update(id, dto, actorUsername);
   }
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Remover usuário' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser('username') actorUsername: string,
+  ) {
+    return this.usersService.remove(id, actorUsername);
   }
 }

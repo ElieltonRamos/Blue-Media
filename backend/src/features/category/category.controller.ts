@@ -23,6 +23,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FindCategoryDto } from './dto/find-category.dto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { CurrentUser } from '../../core/decorators/current-user.decorator';
 
 @ApiTags('categories')
 @ApiBearerAuth()
@@ -35,8 +36,11 @@ export class CategoryController {
   @ApiOperation({ summary: 'Cria uma nova categoria' })
   @ApiResponse({ status: 201, description: 'Categoria criada' })
   @ApiResponse({ status: 409, description: 'Categoria já cadastrada' })
-  create(@Body() dto: CreateCategoryDto) {
-    return this.categoryService.create(dto);
+  create(
+    @Body() dto: CreateCategoryDto,
+    @CurrentUser('username') username: string,
+  ) {
+    return this.categoryService.create(dto, username);
   }
 
   @Get()
@@ -62,8 +66,9 @@ export class CategoryController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCategoryDto,
+    @CurrentUser('username') username: string,
   ) {
-    return this.categoryService.update(id, dto);
+    return this.categoryService.update(id, dto, username);
   }
 
   @Delete(':id')
@@ -71,7 +76,10 @@ export class CategoryController {
   @ApiOperation({ summary: 'Remove categoria' })
   @ApiResponse({ status: 204, description: 'Categoria removida' })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.categoryService.remove(id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser('username') username: string,
+  ) {
+    return this.categoryService.remove(id, username);
   }
 }

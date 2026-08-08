@@ -7,6 +7,7 @@ import { PrismaModule } from './core/database/prisma.module';
 import { CategoryModule } from './features/category/category.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
+import { ClientModule } from './features/client/client.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
     PrismaModule,
     UsersModule,
     CategoryModule,
+    ClientModule,
   ],
   controllers: [AppController],
   providers: [

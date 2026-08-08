@@ -2,6 +2,7 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -17,6 +18,8 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
@@ -36,6 +39,9 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
+      this.logger.warn(
+        `Acesso negado, token não fornecido (${request.method} ${request.url})`,
+      );
       throw new UnauthorizedException('Token não fornecido');
     }
 
@@ -43,6 +49,9 @@ export class JwtAuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
       request['user'] = payload;
     } catch {
+      this.logger.warn(
+        `Acesso negado, token inválido ou expirado (${request.method} ${request.url})`,
+      );
       throw new UnauthorizedException('Token inválido ou expirado');
     }
 
