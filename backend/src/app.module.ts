@@ -8,6 +8,7 @@ import { CategoryModule } from './features/category/category.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { ClientModule } from './features/client/client.module';
+import { TotemModule } from './features/totem/totem.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ClientModule } from './features/client/client.module';
     UsersModule,
     CategoryModule,
     ClientModule,
+    TotemModule,
   ],
   controllers: [AppController],
   providers: [
