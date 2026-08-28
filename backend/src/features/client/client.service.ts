@@ -62,7 +62,12 @@ export class ClientService {
   }
 
   async findAll() {
-    return this.prisma.client.client.findMany();
+    return this.prisma.client.client.findMany({
+      include: {
+        category: { select: { id: true, name: true } },
+        _count: { select: { totems: true } },
+      },
+    });
   }
 
   async findOne(id: number) {
