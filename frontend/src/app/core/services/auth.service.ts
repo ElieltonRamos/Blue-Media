@@ -4,36 +4,37 @@ export default interface User {
   id?: string;
   username: string;
   password: string;
-  workplace: string;
+  name: string;
   role?: string;
-  active?: boolean;
+  isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  deletedAt?: Date | null;
 }
 
 export interface Token {
-  token: string;
-  licenseWarning?: string;
+  accessToken: string;
 }
 
 export interface TokenPayload {
   userId: number;
   username: string;
   role: string;
-  companyId: number;
-  doctorId?: number;
   iat: number;
   exp: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private decodePayload(token: string): TokenPayload {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  }
+
   isValidToken(token: string): boolean {
     if (!token) return false;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = this.decodePayload(token);
       const now = Math.floor(Date.now() / 1000);
       return payload.exp > now + 60;
     } catch {
@@ -43,9 +44,9 @@ export class AuthService {
 
   hasRole(token: string, role: string): boolean {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = this.decodePayload(token);
       return payload.role === role;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -57,11 +58,10 @@ export class AuthService {
 
   getTokenPayload(token?: string): TokenPayload | null {
     token = token || localStorage.getItem('token') || '';
-
     if (!token) return null;
 
     try {
-      return JSON.parse(atob(token.split('.')[1]));
+      return this.decodePayload(token);
     } catch {
       return null;
     }

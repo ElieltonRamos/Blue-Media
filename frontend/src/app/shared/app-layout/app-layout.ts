@@ -3,7 +3,7 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 
-interface NavItem {
+export interface NavItem {
   label: string;
   title: string;
   route: string;
@@ -19,104 +19,60 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppLayout implements OnInit {
-  company = signal({ name: '' });
   isDark = signal(localStorage.getItem('theme') !== 'light');
-  currentRouteTitle = signal('Visão Geral da Clínica');
+  currentRouteTitle = signal('Dashboard');
   currentUser = signal({ initials: '', name: '', role: '' });
 
   mainNav: NavItem[] = [
     {
       label: 'Dashboard',
-      title: 'Visão Geral da Clínica',
+      title: 'Dashboard',
       route: '/dashboard',
       icon: 'grid',
-      roles: ['admin', 'medico', 'atendimento'],
+      roles: ['admin', 'operator'],
     },
     {
-      label: 'Agenda',
-      title: 'Agenda',
-      route: '/dashboard/agenda',
-      icon: 'calendar',
-      roles: ['admin', 'medico', 'atendimento'],
+      label: 'Clients',
+      title: 'Clients',
+      route: '/dashboard/clients',
+      icon: 'building',
+      roles: ['admin', 'operator'],
     },
     {
-      label: 'Config. Agenda',
-      title: 'Configuração de Agenda',
-      route: '/dashboard/agenda-config',
-      icon: 'clock',
-      roles: ['admin', 'medico'],
+      label: 'Totems',
+      title: 'Totems',
+      route: '/dashboard/totems',
+      icon: 'monitor',
+      roles: ['admin', 'operator'],
     },
     {
-      label: 'Tipos Consulta',
-      title: 'Tipos de Consulta',
-      route: '/dashboard/tipos-consulta',
-      icon: 'tag',
-      roles: ['admin', 'atendimento'],
+      label: 'Media',
+      title: 'Media',
+      route: '/dashboard/media',
+      icon: 'image',
+      roles: ['admin', 'operator'],
     },
     {
-      label: 'Pacientes',
-      title: 'Pacientes',
-      route: '/dashboard/pacientes',
+      label: 'Users',
+      title: 'Users',
+      route: '/dashboard/users',
       icon: 'users',
-      roles: ['admin', 'medico', 'atendimento'],
+      roles: ['admin', 'operator'],
     },
     {
-      label: 'Chat/Automação',
-      title: 'Chat e Automação',
-      route: '/dashboard/chats',
-      icon: 'message-square',
-      roles: ['admin', 'atendimento'],
-    },
-    {
-      label: 'Relatórios',
-      title: 'Relatórios',
-      route: '/dashboard/relatorios',
-      icon: 'file-text',
-      roles: ['admin'],
-    },
-    {
-      label: 'Financeiro',
-      title: 'Financeiro e Controle de Caixa',
-      route: '/dashboard/financeiro',
-      icon: 'dollar-sign',
-      roles: ['admin', 'atendimento'], // permite ao atendimento acesso a aba financeiro permitindo gerenciar o pagamento de comissoes
-    },
-    {
-      label: 'Fiscal',
-      title: 'Gestão Fiscal',
-      route: '/dashboard/fiscal',
-      icon: 'receipt',
-      roles: ['admin', 'atendimento'],
+      label: 'Reports',
+      title: 'Reports',
+      route: '/dashboard/reports',
+      icon: 'bar-chart',
+      roles: ['admin', 'operator'],
     },
   ];
 
-  bottomNav: NavItem[] = [
-    {
-      label: 'Configurações',
-      title: 'Configurações',
-      route: '/dashboard/configuracoes',
-      icon: 'settings',
-      roles: ['admin'],
-    },
-    {
-      label: 'Sair',
-      title: '',
-      route: '/',
-      icon: 'log-out',
-      roles: ['admin', 'medico', 'atendimento'],
-    },
-  ];
-
-  private allNav = [...this.mainNav, ...this.bottomNav];
+  private allNav = [...this.mainNav];
 
   get filteredNav(): NavItem[] {
     const role = this.auth.getTokenPayload()?.role ?? '';
     return this.mainNav.filter((item) => item.roles.includes(role));
-  }
-
-  get filteredBottomNav(): NavItem[] {
-    const role = this.auth.getTokenPayload()?.role ?? '';
-    return this.bottomNav.filter((item) => item.roles.includes(role));
   }
 
   constructor(
@@ -126,7 +82,6 @@ export class AppLayout implements OnInit {
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
       const url = e.urlAfterRedirects;
       const match = this.allNav
-        .filter((item) => item.route !== '/')
         .sort((a, b) => b.route.length - a.route.length)
         .find((item) => url.startsWith(item.route));
       this.currentRouteTitle.set(match?.title ?? '');
@@ -149,5 +104,10 @@ export class AppLayout implements OnInit {
     this.isDark.update((v) => !v);
     document.documentElement.classList.toggle('light', !this.isDark());
     localStorage.setItem('theme', this.isDark() ? 'dark' : 'light');
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    this.router.navigate(['/']);
   }
 }

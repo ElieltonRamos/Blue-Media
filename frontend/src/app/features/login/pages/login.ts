@@ -52,7 +52,7 @@ export class Login {
 
     this.serviceLogin.login(username!, password!).subscribe({
       next: (response) => {
-        localStorage.setItem('token', response.token);
+        localStorage.setItem('token', response.accessToken);
         closeLoading();
 
         if (response.licenseWarning) {
