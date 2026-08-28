@@ -21,6 +21,8 @@ import { UpdateTotemDto } from './dto/update-totem.dto';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { PairTotemDto } from './dto/pair-totem.dto';
 import { TotemPairingService } from './totem-pairing.service';
+import { CreateCommandDto } from './dto/create-command.dto';
+import { TotemCommandService } from './totem-command.service';
 
 @ApiTags('totems')
 @ApiBearerAuth()
@@ -29,6 +31,7 @@ export class TotemController {
   constructor(
     private readonly totemService: TotemService,
     private readonly totemPairingService: TotemPairingService,
+    private readonly totemCommandService: TotemCommandService,
   ) {}
 
   @Post()
@@ -106,5 +109,18 @@ export class TotemController {
     @CurrentUser('username') username: string,
   ) {
     return this.totemService.remove(id, username);
+  }
+
+  @Post(':id/commands')
+  @ApiOperation({ summary: 'Enfileira um comando para o totem' })
+  @ApiResponse({ status: 201, description: 'Comando enfileirado' })
+  @ApiResponse({ status: 404, description: 'Totem não encontrado' })
+  async createCommand(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateCommandDto,
+  ) {
+    await this.totemService.findOne(id);
+    this.totemCommandService.enqueue(id, dto.type);
+    return { queued: true };
   }
 }

@@ -123,13 +123,14 @@ model Media {
 }
 
 model PlaybackLog {
-  id       Int      @id @default(autoincrement())
-  totemId  Int      @map("totem_id")
-  mediaId  Int      @map("media_id")
-  playedAt DateTime @map("played_at")
+  id         Int      @id @default(autoincrement())
+  totemId    Int      @map("totem_id")
+  mediaId    Int?     @map("media_id")
+  mediaTitle String   @map("media_title") @db.VarChar(255)
+  playedAt   DateTime @map("played_at")
 
-  totem Totem @relation(fields: [totemId], references: [id])
-  media Media @relation(fields: [mediaId], references: [id])
+  totem Totem  @relation(fields: [totemId], references: [id])
+  media Media? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
 
   @@index([totemId, playedAt])
   @@map("playback_logs")

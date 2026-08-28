@@ -133,4 +133,11 @@ export class TotemService {
       throw error;
     }
   }
+
+  async heartbeat(id: number) {
+    await this.prisma.client.totem.update({
+      where: { id },
+      data: { status: 'online', lastSeenAt: nowBrasilia() },
+    });
+  }
 }

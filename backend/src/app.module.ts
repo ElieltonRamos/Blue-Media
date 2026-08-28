@@ -9,6 +9,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { ClientModule } from './features/client/client.module';
 import { TotemModule } from './features/totem/totem.module';
+import { MediaModule } from './features/media/media.module';
+import { PlaylistModule } from './features/playlist/playlist.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { TotemModule } from './features/totem/totem.module';
     CategoryModule,
     ClientModule,
     TotemModule,
+    MediaModule,
+    PlaylistModule,
   ],
   controllers: [AppController],
   providers: [
