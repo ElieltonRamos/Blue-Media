@@ -4,6 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import 'multer';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';

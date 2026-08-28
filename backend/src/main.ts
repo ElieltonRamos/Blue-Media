@@ -3,9 +3,28 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { version } from '../package.json';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.setGlobalPrefix('api');
+
+  const staticPath = join(process.cwd(), 'public', 'frontend', 'browser');
+
+  app.useStaticAssets(staticPath, {
+    index: false,
+  });
+
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .use((req: Request, res: Response, next: NextFunction) => {
+      if (req.path.startsWith('/api')) return next();
+      res.sendFile(join(staticPath, 'index.html'));
+    });
 
   app.enableShutdownHooks();
 
