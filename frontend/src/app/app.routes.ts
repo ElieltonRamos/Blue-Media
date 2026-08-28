@@ -4,6 +4,7 @@ import { OfflineComponent } from './shared/offline/pages/offline.component';
 import { NotFound } from './shared/offline/pages/not-found';
 import { AppLayout } from './shared/app-layout/app-layout';
 import { authGuard } from './core/guards/auth.guard';
+import { Dashboard } from './features/dashboard/pages/dashboard';
 
 export const routes: Routes = [
   {
@@ -17,7 +18,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: OfflineComponent,
+        component: Dashboard,
       },
     ],
   },

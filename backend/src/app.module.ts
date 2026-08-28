@@ -11,6 +11,7 @@ import { ClientModule } from './features/client/client.module';
 import { TotemModule } from './features/totem/totem.module';
 import { MediaModule } from './features/media/media.module';
 import { PlaylistModule } from './features/playlist/playlist.module';
+import { DashboardModule } from './features/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PlaylistModule } from './features/playlist/playlist.module';
     TotemModule,
     MediaModule,
     PlaylistModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [
