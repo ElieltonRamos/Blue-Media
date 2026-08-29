@@ -2,8 +2,10 @@ import { Component, OnInit, ChangeDetectionStrategy, signal, inject } from '@ang
 import { NotificationService } from '../../../shared/toastr/notification.service';
 import { ModalEditEntity, FormField } from '../../../shared/modal-edit-entity/modal-edit-entity';
 import { ClientsService } from '../services/client.service';
-import { CategoriesService, Category } from '../../category/services/category.service';
+import { CategoriesService } from '../../category/services/category.service';
 import { Client, CreateClientDto } from '../types/client';
+import { Category } from '../../category/types/category';
+import { alertConfirm } from '../../../shared/alerts/custom-alerts';
 
 interface ClientFormEntity {
   id?: number;
@@ -108,8 +110,9 @@ export class Clients implements OnInit {
     });
   }
 
-  remove(client: Client): void {
-    if (!confirm(`Remover o cliente "${client.name}"?`)) return;
+  async remove(client: Client): Promise<void> {
+    const confirmed = await alertConfirm(`Remover o cliente "${client.name}"?`);
+    if (!confirmed) return;
 
     this.clientsService.remove(client.id).subscribe({
       next: () => {

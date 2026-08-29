@@ -5,6 +5,10 @@ import { NotFound } from './shared/offline/pages/not-found';
 import { AppLayout } from './shared/app-layout/app-layout';
 import { authGuard } from './core/guards/auth.guard';
 import { Dashboard } from './features/dashboard/pages/dashboard';
+import { Clients } from './features/clients/pages/clients';
+import { Categories } from './features/category/pages/categories';
+import { Users } from './features/users/pages/users';
+import { Reports } from './features/reports/pages/reports';
 
 export const routes: Routes = [
   {
@@ -19,6 +23,22 @@ export const routes: Routes = [
       {
         path: '',
         component: Dashboard,
+      },
+      {
+        path: 'clientes',
+        component: Clients,
+      },
+      {
+        path: 'categorias',
+        component: Categories,
+      },
+      {
+        path: 'usuarios',
+        component: Users,
+      },
+      {
+        path: 'relatorios',
+        component: Reports,
       },
     ],
   },

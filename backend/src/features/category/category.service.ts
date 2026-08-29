@@ -96,8 +96,27 @@ export class CategoryService {
 
   async remove(id: number, username: string) {
     await this.findOne(id);
-    await this.prisma.client.category.delete({ where: { id } });
-    this.logger.log(`Categoria removida por ${username} (id: ${id})`);
+
+    const clientCount = await this.prisma.client.client.count({
+      where: { categoryId: id },
+    });
+
+    if (clientCount > 0) {
+      this.logger.warn(
+        `Remoção da categoria ${id} bloqueada por ${username}: possui clientes vinculados`,
+      );
+      throw new ConflictException('Categoria possui clientes vinculados');
+    }
+
+    try {
+      await this.prisma.client.category.delete({ where: { id } });
+      this.logger.log(`Categoria removida por ${username} (id: ${id})`);
+    } catch (error) {
+      this.logger.error(
+        `Erro ao remover categoria ${id}: ${this.extractErrorMessage(error)}`,
+      );
+      throw error;
+    }
   }
 
   private extractErrorMessage(error: unknown): string {

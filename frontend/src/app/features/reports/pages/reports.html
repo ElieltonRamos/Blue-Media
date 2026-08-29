@@ -1,0 +1,78 @@
+<div class="flex flex-col gap-6">
+  <!-- HEADER -->
+  <h2 class="text-lg font-semibold text-(--color-text-primary)">Relatórios</h2>
+
+  <!-- FILTERS -->
+  <div
+    class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5 flex flex-wrap items-end gap-4"
+  >
+    <div class="flex flex-col gap-1">
+      <label class="text-[10px] uppercase tracking-wider text-(--color-text-muted)"
+        >Data início</label
+      >
+      <input
+        type="date"
+        [value]="startDate()"
+        (change)="onStartDateChange($any($event.target).value)"
+        class="bg-(--color-input-bg) border border-(--color-input-border) rounded-lg px-3 py-2 text-[12px] text-(--color-input-text) outline-none focus:border-(--color-input-border-focus) transition-colors"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">Data fim</label>
+      <input
+        type="date"
+        [value]="endDate()"
+        (change)="onEndDateChange($any($event.target).value)"
+        class="bg-(--color-input-bg) border border-(--color-input-border) rounded-lg px-3 py-2 text-[12px] text-(--color-input-text) outline-none focus:border-(--color-input-border-focus) transition-colors"
+      />
+    </div>
+
+    <button
+      (click)="applyFilter()"
+      class="px-4 py-2 rounded-(--radius-input) bg-(--color-btn-primary-bg) text-(--color-btn-primary-text) text-sm font-medium hover:bg-(--color-btn-primary-hover) transition-all"
+    >
+      Aplicar
+    </button>
+
+    <div class="flex items-center gap-2 ml-auto">
+      <button
+        (click)="setToday()"
+        class="px-3 py-2 rounded-lg border border-(--color-btn-secondary-border) bg-(--color-btn-secondary-bg) text-(--color-btn-secondary-text) text-xs font-medium hover:bg-(--color-btn-secondary-hover) transition-all"
+      >
+        Hoje
+      </button>
+      <button
+        (click)="setThisWeek()"
+        class="px-3 py-2 rounded-lg border border-(--color-btn-secondary-border) bg-(--color-btn-secondary-bg) text-(--color-btn-secondary-text) text-xs font-medium hover:bg-(--color-btn-secondary-hover) transition-all"
+      >
+        Essa Semana
+      </button>
+      <button
+        (click)="setThisMonth()"
+        class="px-3 py-2 rounded-lg border border-(--color-btn-secondary-border) bg-(--color-btn-secondary-bg) text-(--color-btn-secondary-text) text-xs font-medium hover:bg-(--color-btn-secondary-hover) transition-all"
+      >
+        Esse Mês
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULT CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5">
+      <p class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">
+        Total de Clientes
+      </p>
+      <p class="text-3xl font-semibold text-(--color-text-primary) mt-2">
+        {{ loading() ? '—' : (data()?.totalClients ?? '—') }}
+      </p>
+    </div>
+
+    <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5">
+      <p class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">Total de Mídias</p>
+      <p class="text-3xl font-semibold text-(--color-text-primary) mt-2">
+        {{ loading() ? '—' : (data()?.totalMedia ?? '—') }}
+      </p>
+    </div>
+  </div>
+</div>

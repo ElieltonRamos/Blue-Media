@@ -19,12 +19,12 @@ export class Dashboard implements OnInit {
     {
       label: 'Clientes',
       description: 'Gerenciar entidades',
-      route: '/dashboard/clients',
+      route: '/dashboard/clientes',
       icon: 'building',
     },
     { label: 'Totens', description: 'Nós ativos', route: '/dashboard/totems', icon: 'monitor' },
     {
-      label: 'Mídia',
+      label: 'Mídias',
       description: 'Armazenamento de mídia',
       route: '/dashboard/media',
       icon: 'image',

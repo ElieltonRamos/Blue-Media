@@ -124,6 +124,20 @@
               <path d="M10 18h4" />
             </svg>
           }
+          @case ('tag') {
+            <svg
+              class="w-6 h-6 text-(--color-primary-text)"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M20.59 13.41 11 3H4v7l9.59 9.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82z"
+              />
+              <circle cx="7.5" cy="7.5" r="1.5" />
+            </svg>
+          }
           @case ('monitor') {
             <svg
               class="w-6 h-6 text-(--color-primary-text)"
@@ -185,7 +199,9 @@
   </div>
 
   <!-- ATTENTION TABLE -->
-  <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card overflow-hidden">
+  <div
+    class="rounded-(--radius-card) border border-(--color-border) bg-bg-card overflow-hidden"
+  >
     <div class="flex items-center justify-between px-5 py-4 border-b border-(--color-border)">
       <div class="flex items-center gap-2">
         <svg

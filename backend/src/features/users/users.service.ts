@@ -84,10 +84,17 @@ export class UsersService {
   }
 
   async update(id: number, dto: UpdateUserDto, actorUsername: string) {
+    const { password, ...rest } = dto;
+    const data: Prisma.UserUpdateInput = { ...rest, updatedAt: nowBrasilia() };
+
+    if (password) {
+      data.passwordHash = await bcrypt.hash(password, 10);
+    }
+
     try {
       const user = await prisma.user.update({
         where: { id },
-        data: { ...dto, updatedAt: nowBrasilia() },
+        data,
         select: USER_SAFE_SELECT,
       });
       this.logger.log(

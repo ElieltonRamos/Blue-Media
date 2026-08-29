@@ -68,4 +68,18 @@ export class DashboardService {
       })),
     };
   }
+
+  async getReport() {
+    // Totais gerais, sem filtro de período (client/media não têm relação
+    // temporal que justifique filtrar por data aqui)
+    const [totalClients, totalMedia] = await Promise.all([
+      prisma.client.count(),
+      prisma.media.count(),
+    ]);
+
+    return {
+      totalClients,
+      totalMedia,
+    };
+  }
 }
