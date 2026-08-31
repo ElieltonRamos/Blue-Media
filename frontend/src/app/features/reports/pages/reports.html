@@ -3,13 +3,9 @@
   <h2 class="text-lg font-semibold text-(--color-text-primary)">Relatórios</h2>
 
   <!-- FILTERS -->
-  <div
-    class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5 flex flex-wrap items-end gap-4"
-  >
+  <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5 flex flex-wrap items-end gap-4">
     <div class="flex flex-col gap-1">
-      <label class="text-[10px] uppercase tracking-wider text-(--color-text-muted)"
-        >Data início</label
-      >
+      <label class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">Data início</label>
       <input
         type="date"
         [value]="startDate()"
@@ -57,12 +53,10 @@
     </div>
   </div>
 
-  <!-- RESULT CARDS -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+  <!-- TOP CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
     <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5">
-      <p class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">
-        Total de Clientes
-      </p>
+      <p class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">Total de Clientes</p>
       <p class="text-3xl font-semibold text-(--color-text-primary) mt-2">
         {{ loading() ? '—' : (data()?.totalClients ?? '—') }}
       </p>
@@ -74,5 +68,100 @@
         {{ loading() ? '—' : (data()?.totalMedia ?? '—') }}
       </p>
     </div>
+
+    <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card p-5">
+      <p class="text-[10px] uppercase tracking-wider text-(--color-text-muted)">Reproduções no Período</p>
+      <p class="text-3xl font-semibold text-(--color-text-primary) mt-2">
+        {{ loading() ? '—' : (data()?.totalPlaybacksInPeriod ?? '—') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- TOP MEDIA -->
+    <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card overflow-hidden">
+      <div class="px-5 py-4 border-b border-(--color-border)">
+        <h3 class="text-sm font-semibold text-(--color-text-primary)">Mídias Mais Tocadas</h3>
+      </div>
+      <table class="w-full text-sm">
+        <tbody>
+          @if (loading()) {
+            <tr>
+              <td class="px-5 py-6 text-center text-(--color-text-muted) text-xs">Carregando...</td>
+            </tr>
+          } @else {
+            @for (item of data()?.topMedia ?? []; track item.mediaTitle) {
+              <tr class="border-b border-(--color-border) last:border-0">
+                <td class="px-5 py-3 text-(--color-text-primary)">{{ item.mediaTitle }}</td>
+                <td class="px-5 py-3 text-right text-(--color-text-secondary) font-mono">{{ item.playCount }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="px-5 py-6 text-center text-(--color-text-muted) text-xs">
+                  Nenhuma reprodução no período
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PLAYS BY CLIENT -->
+    <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card overflow-hidden">
+      <div class="px-5 py-4 border-b border-(--color-border)">
+        <h3 class="text-sm font-semibold text-(--color-text-primary)">Reproduções por Cliente</h3>
+      </div>
+      <table class="w-full text-sm">
+        <tbody>
+          @if (loading()) {
+            <tr>
+              <td class="px-5 py-6 text-center text-(--color-text-muted) text-xs">Carregando...</td>
+            </tr>
+          } @else {
+            @for (item of data()?.playsByClient ?? []; track item.clientId) {
+              <tr class="border-b border-(--color-border) last:border-0">
+                <td class="px-5 py-3 text-(--color-text-primary)">{{ item.clientName }}</td>
+                <td class="px-5 py-3 text-right text-(--color-text-secondary) font-mono">{{ item.playCount }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="px-5 py-6 text-center text-(--color-text-muted) text-xs">
+                  Nenhuma reprodução no período
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- UNUSED MEDIA -->
+  <div class="rounded-(--radius-card) border border-(--color-border) bg-bg-card overflow-hidden">
+    <div class="px-5 py-4 border-b border-(--color-border)">
+      <h3 class="text-sm font-semibold text-(--color-text-primary)">Mídias Ativas Sem Uso no Período</h3>
+    </div>
+    <table class="w-full text-sm">
+      <tbody>
+        @if (loading()) {
+          <tr>
+            <td class="px-5 py-6 text-center text-(--color-text-muted) text-xs">Carregando...</td>
+          </tr>
+        } @else {
+          @for (item of data()?.unusedMedia ?? []; track item.id) {
+            <tr class="border-b border-(--color-border) last:border-0">
+              <td class="px-5 py-3 text-(--color-text-primary)">{{ item.title }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="px-5 py-6 text-center text-(--color-text-muted) text-xs">
+                Todas as mídias ativas foram usadas no período
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
   </div>
 </div>

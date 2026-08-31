@@ -7,8 +7,8 @@ import {
 } from '@nestjs/swagger';
 import { DashboardService } from './dashboard.service';
 import { DashboardResponseDto } from './dto/dashboard-response.dto';
-import { ReportResponseDto } from './dto/report-response.dto';
 import { FindReportDto } from './dto/find-report-dto';
+import { ReportResponseDto } from './dto/report-response.dto';
 
 @ApiTags('dashboard')
 @Controller('dashboard')
@@ -29,7 +29,8 @@ export class DashboardController {
 
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Retorna os indicadores do relatório (total de clientes e mídias)',
+    summary:
+      'Retorna os indicadores do relatório (clientes, mídias e reproduções no período)',
   })
   @ApiResponse({
     status: 200,
@@ -38,6 +39,6 @@ export class DashboardController {
   })
   @Get('report')
   getReport(@Query() query: FindReportDto) {
-    return this.dashboardService.getReport();
+    return this.dashboardService.getReport(query);
   }
 }

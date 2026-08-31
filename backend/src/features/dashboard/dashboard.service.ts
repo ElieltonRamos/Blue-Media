@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { prisma } from '../../core/database/prisma';
 import { nowBrasilia } from '../../core/utils/date-utils';
+import { FindReportDto } from './dto/find-report-dto';
 
 const ATTENTION_TOTEMS_LIMIT = 50;
+const TOP_MEDIA_LIMIT = 10;
 
 @Injectable()
 export class DashboardService {
@@ -69,17 +71,103 @@ export class DashboardService {
     };
   }
 
-  async getReport() {
-    // Totais gerais, sem filtro de período (client/media não têm relação
-    // temporal que justifique filtrar por data aqui)
-    const [totalClients, totalMedia] = await Promise.all([
+  async getReport(query: FindReportDto) {
+    const start = query.startDate ? new Date(query.startDate) : new Date(0);
+    const end = query.endDate
+      ? new Date(`${query.endDate}T23:59:59.999`)
+      : nowBrasilia();
+
+    const periodFilter = { playedAt: { gte: start, lte: end } };
+
+    const [
+      totalClients,
+      totalMedia,
+      totalPlaybacksInPeriod,
+      topMediaRows,
+      playsByTotemRows,
+      usedMediaIdRows,
+      activeMedia,
+    ] = await Promise.all([
       prisma.client.count(),
       prisma.media.count(),
+      prisma.playbackLog.count({ where: periodFilter }),
+      prisma.playbackLog.groupBy({
+        by: ['mediaTitle'],
+        where: periodFilter,
+        _count: true,
+        orderBy: { _count: { mediaTitle: 'desc' } },
+        take: TOP_MEDIA_LIMIT,
+      }),
+      prisma.playbackLog.groupBy({
+        by: ['totemId'],
+        where: periodFilter,
+        _count: true,
+      }),
+      prisma.playbackLog.findMany({
+        where: { ...periodFilter, mediaId: { not: null } },
+        select: { mediaId: true },
+        distinct: ['mediaId'],
+      }),
+      prisma.media.findMany({
+        where: { status: 'active' },
+        select: { id: true, title: true },
+      }),
     ]);
+
+    // Reproduções por cliente: agrupado por totemId, mapeado pro client de cada totem
+    const totemIds = playsByTotemRows.map((r) => r.totemId);
+    const totems = totemIds.length
+      ? await prisma.totem.findMany({
+          where: { id: { in: totemIds } },
+          select: {
+            id: true,
+            clientId: true,
+            client: { select: { name: true } },
+          },
+        })
+      : [];
+
+    const totemToClient = new Map(
+      totems.map((t) => [t.id, { id: t.clientId, name: t.client.name }]),
+    );
+
+    const clientPlayCounts = new Map<
+      number,
+      { clientName: string; playCount: number }
+    >();
+    for (const row of playsByTotemRows) {
+      const client = totemToClient.get(row.totemId);
+      if (!client) continue;
+      const current = clientPlayCounts.get(client.id) ?? {
+        clientName: client.name,
+        playCount: 0,
+      };
+      current.playCount += row._count;
+      clientPlayCounts.set(client.id, current);
+    }
+
+    const playsByClient = Array.from(clientPlayCounts.entries())
+      .map(([clientId, v]) => ({
+        clientId,
+        clientName: v.clientName,
+        playCount: v.playCount,
+      }))
+      .sort((a, b) => b.playCount - a.playCount);
+
+    // Mídias ativas sem nenhuma reprodução no período
+    const usedMediaIds = new Set(usedMediaIdRows.map((r) => r.mediaId));
+    const unusedMedia = activeMedia.filter((m) => !usedMediaIds.has(m.id));
 
     return {
       totalClients,
       totalMedia,
+      totalPlaybacksInPeriod,
+      topMedia: topMediaRows.map((r) => ({
+        mediaTitle: r.mediaTitle,
+        playCount: r._count,
+      })),
+      playsByClient,
+      unusedMedia: unusedMedia.map((m) => ({ id: m.id, title: m.title })),
     };
   }
 }
